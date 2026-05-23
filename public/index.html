@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Production Voice Agent</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">OpenAI-first realtime architecture</p>
+        <h1>Production Voice Agent</h1>
+        <p class="lede">
+          A deployable WebRTC client that requests an ephemeral voice session from the backend before connecting to the Realtime API.
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="controls-title">
+        <h2 id="controls-title">Session Controls</h2>
+        <label>
+          Tenant ID
+          <input id="tenantId" value="tenant_demo" autocomplete="off">
+        </label>
+        <label>
+          User ID
+          <input id="userId" value="user_demo" autocomplete="off">
+        </label>
+        <div class="actions">
+          <button id="startButton" type="button">Start Voice Session</button>
+          <button id="stopButton" type="button" disabled>Stop</button>
+        </div>
+        <p id="status" role="status">Idle. No microphone connection has been opened.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="events-title">
+        <h2 id="events-title">Runtime Events</h2>
+        <pre id="events" aria-live="polite">[]</pre>
+      </section>
+
+      <audio id="remoteAudio" autoplay></audio>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

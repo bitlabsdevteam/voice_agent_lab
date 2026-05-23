@@ -1,0 +1,31 @@
+{
+  "name": "production-voice-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-shaped voice agent foundation following AGENTS.md.",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "node scripts/lint.cjs",
+    "format:check": "node scripts/format-check.cjs",
+    "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",
+    "test:contract": "npm run build && node --test dist/tests/contract/*.test.js",
+    "test:integration": "npm run build && node --test dist/tests/integration/*.test.js",
+    "test:e2e": "npm run build && node --test dist/tests/e2e/*.test.js",
+    "test:evals": "npm run build && node --test dist/tests/evals/*.test.js",
+    "test:latency": "npm run build && node --test dist/tests/latency/*.test.js",
+    "test:load": "npm run build && node --test dist/tests/load/*.test.js",
+    "test:security": "npm run build && node --test dist/tests/security/*.test.js",
+    "test:release": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run test:contract && npm run test:integration && npm run test:e2e && npm run test:evals && npm run test:latency && npm run test:load && npm run test:security",
+    "smoke:local": "npm run build && node scripts/smoke.cjs local",
+    "smoke:staging": "npm run build && node scripts/smoke.cjs staging",
+    "smoke:production": "npm run build && node scripts/smoke.cjs production",
+    "release:manifest": "node scripts/release-manifest.cjs",
+    "start": "npm run build && node dist/src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {}
+}
