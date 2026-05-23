@@ -8,6 +8,7 @@ const prompt = fs.readFileSync(promptPath, "utf8");
 const promptVersion = prompt.match(/version:\s*([^\n]+)/)?.[1]?.trim() || "unknown";
 const modelId = process.env.VOICE_AGENT_MODEL || "gpt-realtime-2";
 const provider = process.env.VOICE_AGENT_PROVIDER || "mock-openai";
+const sessionStore = process.env.VOICE_AGENT_SESSION_STORE || "memory";
 const buildId = process.env.BUILD_ID || `local-${Date.now()}`;
 
 const manifest = {
@@ -17,6 +18,7 @@ const manifest = {
   createdAt: new Date().toISOString(),
   provider,
   modelId,
+  sessionStore,
   promptVersion,
   promptSha256: sha256(prompt),
   releaseGates: [

@@ -8,6 +8,7 @@ test("release manifest script records production-critical version fields", () =>
   assert.equal(script.includes("promptVersion"), true);
   assert.equal(script.includes("modelId"), true);
   assert.equal(script.includes("provider"), true);
+  assert.equal(script.includes("sessionStore"), true);
   assert.equal(script.includes("rollback"), true);
   assert.equal(script.includes("releaseGates"), true);
 });

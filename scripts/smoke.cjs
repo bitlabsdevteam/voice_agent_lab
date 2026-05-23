@@ -4,6 +4,11 @@ const environment = process.argv[2] || "local";
 const deps = createAppDependencies();
 
 async function main() {
+  const readiness = require("../dist/src/health/readiness.js").getReadiness(deps.config, deps.store);
+  if (!readiness.ok) {
+    throw new Error(`Readiness failed: ${JSON.stringify(readiness.checks)}`);
+  }
+
   const auth = {
     tenantId: `tenant_smoke_${environment}`,
     userId: `user_smoke_${environment}`,
@@ -39,6 +44,7 @@ async function main() {
         provider: session.config.provider,
         modelId: session.config.modelId,
         promptVersion: session.config.promptVersion,
+        sessionStore: deps.store.kind,
         sessionId: session.sessionId
       },
       null,

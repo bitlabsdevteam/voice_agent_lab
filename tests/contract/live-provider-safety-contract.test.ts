@@ -79,3 +79,40 @@ test("live ElevenLabs provider refuses to run without server-side API key", asyn
     /ELEVENLABS_API_KEY/
   );
 });
+
+test("live ElevenLabs provider requests signed URL with configured agent id", async () => {
+  let capturedUrl = "";
+  let capturedKey = "";
+  const provider = new ElevenLabsProvider("eleven_key", "agent_123", "https://api.elevenlabs.test/v1", async (url, init) => {
+    capturedUrl = url;
+    capturedKey = init?.headers?.["xi-api-key"] ?? "";
+    return {
+      ok: true,
+      status: 200,
+      async text() {
+        return "";
+      },
+      async json() {
+        return {
+          signed_url: "wss://api.elevenlabs.test/v1/convai/conversation?token=signed",
+          conversation_id: "conv_123"
+        };
+      }
+    };
+  });
+  const config = toSessionConfig(loadRuntimeConfig({ VOICE_AGENT_PROVIDER: "elevenlabs" }));
+
+  const session = await provider.createSession(
+    { channel: "web", tenantId: "tenant", userId: "user", consentState: "denied" },
+    config
+  );
+
+  assert.equal(
+    capturedUrl,
+    "https://api.elevenlabs.test/v1/convai/conversation/get-signed-url?agent_id=agent_123&include_conversation_id=true"
+  );
+  assert.equal(capturedKey, "eleven_key");
+  assert.equal(session.sessionId, "conv_123");
+  assert.equal(session.clientSecret.startsWith("wss://"), true);
+  assert.equal(session.config.transport, "websocket");
+});

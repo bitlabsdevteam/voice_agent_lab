@@ -11,6 +11,14 @@ test("browser client requests backend session before opening WebRTC call", () =>
   assert.equal(app.includes("https://api.openai.com/v1/realtime/calls"), true);
 });
 
+test("browser client supports ElevenLabs signed WebSocket without API key", () => {
+  const app = readFileSync("public/app.js", "utf8");
+
+  assert.equal(app.includes("new WebSocket(session.clientSecret)"), true);
+  assert.equal(app.includes("conversation_initiation_client_data"), true);
+  assert.equal(app.includes('"xi-api-key"'), false);
+});
+
 test("browser client does not embed provider API keys", () => {
   const html = readFileSync("public/index.html", "utf8");
   const app = readFileSync("public/app.js", "utf8");
