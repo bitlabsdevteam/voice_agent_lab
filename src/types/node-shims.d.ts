@@ -9,6 +9,8 @@ declare const console: {
   error(...args: unknown[]): void;
 };
 
+declare function require(path: string): any;
+
 declare function encodeURIComponent(value: string): string;
 
 declare function fetch(
@@ -58,7 +60,7 @@ declare module "node:http" {
   export type ServerResponse = {
     statusCode: number;
     setHeader(name: string, value: string): void;
-    end(body?: string): void;
+    end(body?: string | Uint8Array): void;
   };
   export function createServer(
     listener: (request: IncomingMessage, response: ServerResponse) => void
@@ -79,6 +81,7 @@ declare module "node:fs" {
     isFile(): boolean;
   }>;
   export function readFileSync(path: string, encoding: "utf8"): string;
+  export function readFileSync(path: string): Uint8Array;
   export function statSync(path: string): { isDirectory(): boolean; isFile(): boolean };
   export function writeFileSync(path: string, data: string): void;
   export function unlinkSync(path: string): void;
@@ -87,7 +90,9 @@ declare module "node:fs" {
 declare module "node:path" {
   export function dirname(path: string): string;
   export function join(...parts: string[]): string;
+  export function normalize(path: string): string;
   export function extname(path: string): string;
+  export const sep: string;
 }
 
 declare module "node:perf_hooks" {

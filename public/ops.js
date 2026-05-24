@@ -21,6 +21,8 @@ stopButton.addEventListener("click", () => {
 });
 
 async function startVoiceSession() {
+  startButton.disabled = true;
+  stopButton.disabled = false;
   setStatus("Requesting ephemeral voice session from backend...");
   const tenantId = document.querySelector("#tenantId").value.trim();
   const userId = document.querySelector("#userId").value.trim();
@@ -95,8 +97,6 @@ async function startVoiceSession() {
     sdp: await realtimeResponse.text()
   });
 
-  startButton.disabled = true;
-  stopButton.disabled = false;
   setStatus("Connected. You can speak now.");
 }
 
@@ -118,8 +118,6 @@ function startElevenLabsSession(session) {
   dataChannel.addEventListener("message", (event) => {
     appendEvent(JSON.parse(event.data));
   });
-  startButton.disabled = true;
-  stopButton.disabled = false;
 }
 
 function stopVoiceSession() {

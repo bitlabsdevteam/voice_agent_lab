@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Voice Agent Operations</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="ops-page">
+    <main class="shell">
+      <section class="hero ops-hero">
+        <p class="eyebrow">Runtime console</p>
+        <h1>Operations</h1>
+        <p class="lede">
+          Inspect voice session setup, provider transport behavior, and realtime event logs without exposing provider credentials.
+        </p>
+        <a class="button-link inline-link" href="/">Avatar</a>
+      </section>
+
+      <section class="panel" aria-labelledby="controls-title">
+        <h2 id="controls-title">Session Controls</h2>
+        <label>
+          Tenant ID
+          <input id="tenantId" value="tenant_demo" autocomplete="off">
+        </label>
+        <label>
+          User ID
+          <input id="userId" value="user_demo" autocomplete="off">
+        </label>
+        <div class="actions">
+          <button id="startButton" type="button">Start Voice Session</button>
+          <button id="stopButton" type="button" disabled>Stop</button>
+        </div>
+        <p id="status" role="status">Idle. No microphone connection has been opened.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="events-title">
+        <h2 id="events-title">Runtime Events</h2>
+        <pre id="events" aria-live="polite">[]</pre>
+      </section>
+
+      <audio id="remoteAudio" autoplay></audio>
+    </main>
+    <script src="/ops.js"></script>
+  </body>
+</html>

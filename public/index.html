@@ -3,43 +3,43 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Production Voice Agent</title>
+    <title>Aiko Voice Agent</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
-  <body>
-    <main class="shell">
-      <section class="hero">
-        <p class="eyebrow">OpenAI-first realtime architecture</p>
-        <h1>Production Voice Agent</h1>
-        <p class="lede">
-          A deployable WebRTC client that requests an ephemeral voice session from the backend before connecting to the Realtime API.
-        </p>
-      </section>
-
-      <section class="panel" aria-labelledby="controls-title">
-        <h2 id="controls-title">Session Controls</h2>
-        <label>
-          Tenant ID
-          <input id="tenantId" value="tenant_demo" autocomplete="off">
-        </label>
-        <label>
-          User ID
-          <input id="userId" value="user_demo" autocomplete="off">
-        </label>
-        <div class="actions">
-          <button id="startButton" type="button">Start Voice Session</button>
-          <button id="stopButton" type="button" disabled>Stop</button>
+  <body class="avatar-page">
+    <main class="avatar-shell" data-avatar-state="idle">
+      <section class="avatar-stage" aria-labelledby="avatar-title">
+        <canvas id="avatarCanvas" aria-label="Interactive 3D avatar stage for Aiko"></canvas>
+        <div class="stage-vignette" aria-hidden="true"></div>
+        <div class="loading-ring" aria-hidden="true"></div>
+        <div class="mic-pulse" aria-hidden="true"></div>
+        <div class="drop-affordance">
+          <button id="avatarFileButton" type="button">Drop or choose GLB/GLTF</button>
+          <input id="avatarFileInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden>
         </div>
-        <p id="status" role="status">Idle. No microphone connection has been opened.</p>
-      </section>
 
-      <section class="panel" aria-labelledby="events-title">
-        <h2 id="events-title">Runtime Events</h2>
-        <pre id="events" aria-live="polite">[]</pre>
-      </section>
+        <div class="avatar-copy">
+          <p class="eyebrow">Realtime voice assistant</p>
+          <h1 id="avatar-title">Aiko</h1>
+          <p class="lede">A calm, attentive voice agent ready for live support conversations.</p>
+        </div>
 
-      <audio id="remoteAudio" autoplay></audio>
+        <section class="voice-dock" aria-labelledby="session-title">
+          <div>
+            <p class="dock-label" id="session-title">Session</p>
+            <p id="status" class="dock-status" role="status">Idle. No microphone connection has been opened.</p>
+          </div>
+          <div class="actions compact-actions">
+            <button id="startButton" type="button">Start voice session</button>
+            <button id="stopButton" type="button" disabled>Stop</button>
+            <a class="button-link" href="/ops.html">Operations</a>
+          </div>
+        </section>
+
+        <audio id="remoteAudio" autoplay></audio>
+      </section>
     </main>
-    <script src="/app.js"></script>
+    <script src="/assets/avatar-runtime.js"></script>
+    <script type="module" src="/avatar.js"></script>
   </body>
 </html>

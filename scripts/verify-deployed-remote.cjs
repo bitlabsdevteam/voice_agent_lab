@@ -19,7 +19,8 @@ async function main() {
   checks.push(await checkJson(`${normalizedBaseUrl}/health`, 200, "health"));
   checks.push(await checkJson(`${normalizedBaseUrl}/ready`, 200, "readiness"));
   checks.push(await checkText(`${normalizedBaseUrl}/metrics`, 200, "metrics", "voice_agent_sessions_created_total"));
-  checks.push(await checkText(`${normalizedBaseUrl}/`, 200, "static_ui", "Production Voice Agent"));
+  checks.push(await checkText(`${normalizedBaseUrl}/`, 200, "static_ui", "Aiko"));
+  checks.push(await checkText(`${normalizedBaseUrl}/ops.html`, 200, "operations_ui", "Runtime Events"));
   checks.push(await checkJson(`${normalizedBaseUrl}/api/voice/config`, 200, "client_config"));
 
   const evidence = {

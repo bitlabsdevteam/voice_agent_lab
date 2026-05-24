@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, normalize, sep } from "node:path";
 import { loadRuntimeConfig, toSessionConfig, type RuntimeConfig } from "./config/voice-config";
 import type { AuthContext, CreateVoiceSessionInput } from "./contracts/session";
 import { createVoiceProvider } from "./providers/provider-factory";
@@ -173,19 +173,24 @@ function tryServeStatic(request: IncomingMessage, response: ServerResponse): boo
     return false;
   }
 
-  const path = request.url === "/" ? "/index.html" : request.url;
-  if (!path || !["/index.html", "/app.js", "/styles.css"].includes(path)) {
+  const requestedPath = request.url?.split("?")[0] ?? "/";
+  const path = requestedPath === "/" ? "/index.html" : requestedPath;
+  const publicPath = normalize(path).replace(/^(\.\.(\/|\\|$))+/, "");
+  const allowedFiles = new Set(["/index.html", "/ops.html", "/avatar.js", "/ops.js", "/styles.css"]);
+  const isAllowedAsset = publicPath.startsWith(`/assets${sep}`) || publicPath.startsWith("/assets/");
+
+  if (!allowedFiles.has(publicPath) && !isAllowedAsset) {
     return false;
   }
 
-  const filePath = join(process.cwd(), "public", path.slice(1));
+  const filePath = join(process.cwd(), "public", publicPath.slice(1));
   if (!existsSync(filePath)) {
     return false;
   }
 
   response.statusCode = 200;
-  response.setHeader("content-type", contentTypeFor(path));
-  response.end(readFileSync(filePath, "utf8"));
+  response.setHeader("content-type", contentTypeFor(publicPath));
+  response.end(readFileSync(filePath));
   return true;
 }
 
@@ -195,6 +200,18 @@ function contentTypeFor(path: string): string {
   }
   if (path.endsWith(".css")) {
     return "text/css";
+  }
+  if (path.endsWith(".glb")) {
+    return "model/gltf-binary";
+  }
+  if (path.endsWith(".gltf")) {
+    return "model/gltf+json";
+  }
+  if (path.endsWith(".png")) {
+    return "image/png";
+  }
+  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+    return "image/jpeg";
   }
   return "text/html";
 }

@@ -15,7 +15,13 @@ async function main() {
   checks.push(
     await request(app, "GET", "/", "static_ui", {
       expectedStatus: 200,
-      expectedText: "Production Voice Agent"
+      expectedText: "Aiko"
+    })
+  );
+  checks.push(
+    await request(app, "GET", "/ops.html", "operations_ui", {
+      expectedStatus: 200,
+      expectedText: "Runtime Events"
     })
   );
   checks.push(

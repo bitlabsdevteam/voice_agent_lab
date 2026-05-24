@@ -29,7 +29,8 @@ test("local deployment verifier probes health readiness metrics and static UI", 
   assert.equal(script.includes("/health"), true);
   assert.equal(script.includes("/ready"), true);
   assert.equal(script.includes("/metrics"), true);
-  assert.equal(script.includes("Production Voice Agent"), true);
+  assert.equal(script.includes("Aiko"), true);
+  assert.equal(script.includes("/ops.html"), true);
   assert.equal(script.includes("release/deployment-evidence.json"), true);
 });
 
@@ -40,6 +41,7 @@ test("remote deployment verifier probes hosted base url and writes evidence", ()
   assert.equal(script.includes("/health"), true);
   assert.equal(script.includes("/ready"), true);
   assert.equal(script.includes("/metrics"), true);
+  assert.equal(script.includes("/ops.html"), true);
   assert.equal(script.includes("release/remote-deployment-evidence.json"), true);
 });
 
