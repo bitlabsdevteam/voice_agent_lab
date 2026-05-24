@@ -1,5 +1,6 @@
 import type { RuntimeConfig } from "../config/voice-config";
 import type { SessionStore } from "../session/session-store";
+import type { EventSink } from "../contracts/events";
 
 export type ReadinessResult = {
   ok: boolean;
@@ -10,12 +11,17 @@ export type ReadinessResult = {
   }>;
 };
 
-export function getReadiness(config: RuntimeConfig, store: SessionStore): ReadinessResult {
+export function getReadiness(config: RuntimeConfig, store: SessionStore, eventSink?: EventSink): ReadinessResult {
   const checks = [
     {
       name: "session_store",
       ok: store.kind === config.sessionStore,
       message: `configured=${config.sessionStore}; active=${store.kind}`
+    },
+    {
+      name: "event_sink",
+      ok: eventSink ? eventSink.kind === config.eventSink : true,
+      message: eventSink ? `configured=${config.eventSink}; active=${eventSink.kind}` : "not provided"
     },
     {
       name: "prompt_version",
@@ -26,6 +32,16 @@ export function getReadiness(config: RuntimeConfig, store: SessionStore): Readin
       name: "model",
       ok: config.modelId.trim().length > 0,
       message: config.modelId
+    },
+    {
+      name: "database_url",
+      ok: config.sessionStore === "postgres" || config.eventSink === "postgres" ? Boolean(config.databaseUrl) : true,
+      message:
+        config.sessionStore === "postgres" || config.eventSink === "postgres"
+          ? config.databaseUrl
+            ? "configured"
+            : "DATABASE_URL missing"
+          : "not required"
     },
     providerCredentialCheck(config)
   ];

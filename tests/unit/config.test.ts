@@ -15,3 +15,15 @@ test("converts runtime config into client-safe session config", () => {
   assert.equal(config.transport, "webrtc");
   assert.equal(config.expiresInSeconds, 120);
 });
+
+test("loads postgres persistence config", () => {
+  const config = loadRuntimeConfig({
+    VOICE_AGENT_SESSION_STORE: "postgres",
+    VOICE_AGENT_EVENT_SINK: "postgres",
+    DATABASE_URL: "postgres://example"
+  });
+
+  assert.equal(config.sessionStore, "postgres");
+  assert.equal(config.eventSink, "postgres");
+  assert.equal(config.databaseUrl, "postgres://example");
+});

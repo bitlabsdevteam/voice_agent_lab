@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "checkedAt": "2026-05-24T00:44:41.224Z",
+  "provider": "openai",
+  "remoteDeployment": {
+    "ok": true,
+    "skipped": true,
+    "baseUrl": null
+  },
+  "liveSmoke": {
+    "ok": true,
+    "skipped": true,
+    "checkedAt": "2026-05-24T00:44:41.218Z"
+  }
+}

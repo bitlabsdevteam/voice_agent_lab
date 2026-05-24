@@ -1,6 +1,7 @@
 FROM node:23-slim AS build
 WORKDIR /app
 COPY package.json tsconfig.json ./
+RUN npm install
 COPY src ./src
 COPY tests ./tests
 COPY scripts ./scripts
@@ -15,6 +16,7 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV VOICE_AGENT_PROVIDER=mock-openai
 ENV VOICE_AGENT_SESSION_STORE=file
+ENV VOICE_AGENT_EVENT_SINK=file
 ENV VOICE_AGENT_DATA_DIR=/data
 COPY package.json ./
 COPY --from=build /app/dist ./dist

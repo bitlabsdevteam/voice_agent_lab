@@ -22,5 +22,5 @@ test("microphone denial maps to transcript-only retention and keeps session crea
     testAuth
   );
 
-  assert.equal(store.get(session.sessionId)?.retentionPolicy, "transcript_only");
+  assert.equal((await store.get(session.sessionId))?.retentionPolicy, "transcript_only");
 });

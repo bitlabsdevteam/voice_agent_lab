@@ -9,6 +9,12 @@ test("release manifest script records production-critical version fields", () =>
   assert.equal(script.includes("modelId"), true);
   assert.equal(script.includes("provider"), true);
   assert.equal(script.includes("sessionStore"), true);
+  assert.equal(script.includes("eventSink"), true);
+  assert.equal(script.includes("liveSmoke"), true);
+  assert.equal(script.includes("observability"), true);
+  assert.equal(script.includes("deploymentEvidence"), true);
+  assert.equal(script.includes("remoteDeploymentEvidence"), true);
+  assert.equal(script.includes("productionCanaryEvidence"), true);
   assert.equal(script.includes("rollback"), true);
   assert.equal(script.includes("releaseGates"), true);
 });

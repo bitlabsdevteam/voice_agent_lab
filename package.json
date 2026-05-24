@@ -21,11 +21,25 @@
     "smoke:local": "npm run build && node scripts/smoke.cjs local",
     "smoke:staging": "npm run build && node scripts/smoke.cjs staging",
     "smoke:production": "npm run build && node scripts/smoke.cjs production",
+    "smoke:live:openai": "npm run build && node scripts/live-provider-smoke.cjs openai",
+    "smoke:live:elevenlabs": "npm run build && node scripts/live-provider-smoke.cjs elevenlabs",
+    "deploy:verify:local": "npm run build && node scripts/verify-deployed-local.cjs",
+    "deploy:verify:remote": "npm run build && node scripts/verify-deployed-remote.cjs",
+    "deploy:canary:openai": "node scripts/production-canary.cjs openai",
+    "deploy:canary:elevenlabs": "node scripts/production-canary.cjs elevenlabs",
+    "deploy:check": "node scripts/deployment-check.cjs",
+    "deploy:check:production": "node scripts/production-approval.cjs",
     "release:manifest": "node scripts/release-manifest.cjs",
     "start": "npm run build && node dist/src/index.js"
   },
   "engines": {
     "node": ">=20"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@types/pg": "^8.20.0",
+    "pg": "^8.21.0"
+  }
 }

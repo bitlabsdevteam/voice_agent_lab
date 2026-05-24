@@ -20,7 +20,7 @@ export class FileSessionStore implements SessionStore {
     }
   }
 
-  save(session: StoredVoiceSession): void {
+  async save(session: StoredVoiceSession): Promise<void> {
     const file = this.read();
     const existingIndex = file.sessions.findIndex((candidate) => candidate.sessionId === session.sessionId);
     if (existingIndex >= 0) {
@@ -31,20 +31,20 @@ export class FileSessionStore implements SessionStore {
     this.write(file);
   }
 
-  get(sessionId: string): StoredVoiceSession | undefined {
+  async get(sessionId: string): Promise<StoredVoiceSession | undefined> {
     return this.read().sessions.find((session) => session.sessionId === sessionId);
   }
 
-  list(): StoredVoiceSession[] {
+  async list(): Promise<StoredVoiceSession[]> {
     return this.read().sessions;
   }
 
-  markEnded(sessionId: string): void {
-    const session = this.get(sessionId);
+  async markEnded(sessionId: string): Promise<void> {
+    const session = await this.get(sessionId);
     if (!session) {
       return;
     }
-    this.save({
+    await this.save({
       ...session,
       status: "ended",
       endedAt: new Date().toISOString()

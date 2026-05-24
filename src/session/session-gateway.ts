@@ -34,8 +34,8 @@ export class SessionGateway {
       status: "created"
     };
 
-    this.store.save(stored);
-    this.eventSink.emit({
+    await this.store.save(stored);
+    await this.eventSink.emit({
       eventId: randomUUID(),
       type: "session.created",
       sessionId: stored.sessionId,
@@ -53,7 +53,7 @@ export class SessionGateway {
   }
 
   async connect(sessionId: string, auth: AuthContext): Promise<void> {
-    const session = this.store.get(sessionId);
+    const session = await this.store.get(sessionId);
     if (!session) {
       throw new Error("Unknown session");
     }
@@ -62,8 +62,8 @@ export class SessionGateway {
     }
 
     await this.provider.connect(sessionId);
-    this.store.save({ ...session, status: "connected" });
-    this.eventSink.emit({
+    await this.store.save({ ...session, status: "connected" });
+    await this.eventSink.emit({
       eventId: randomUUID(),
       type: "session.connected",
       sessionId,
@@ -74,7 +74,7 @@ export class SessionGateway {
   }
 
   async endSession(sessionId: string, auth: AuthContext): Promise<void> {
-    const session = this.store.get(sessionId);
+    const session = await this.store.get(sessionId);
     if (!session) {
       throw new Error("Unknown session");
     }
@@ -83,8 +83,8 @@ export class SessionGateway {
     }
 
     await this.provider.endSession(sessionId);
-    this.store.markEnded(sessionId);
-    this.eventSink.emit({
+    await this.store.markEnded(sessionId);
+    await this.eventSink.emit({
       eventId: randomUUID(),
       type: "session.ended",
       sessionId,

@@ -26,7 +26,15 @@ export type ConversationEvent = {
   payload: Record<string, unknown>;
 };
 
+export type EventRetentionPurgeInput = {
+  cutoffIso: string;
+  ephemeralSessionIds: string[];
+};
+
 export type EventSink = {
-  emit(event: ConversationEvent): void;
-  list(): ConversationEvent[];
+  readonly kind: "memory" | "file" | "postgres";
+  emit(event: ConversationEvent): Promise<void>;
+  list(): Promise<ConversationEvent[]>;
+  replaceAll?(events: ConversationEvent[]): Promise<void>;
+  purgeExpiredEvents?(input: EventRetentionPurgeInput): Promise<number>;
 };

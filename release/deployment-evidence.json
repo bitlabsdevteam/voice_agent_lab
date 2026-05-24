@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "checkedAt": "2026-05-24T00:42:42.725Z",
+  "mode": "in_process_built_app",
+  "checks": [
+    {
+      "name": "health",
+      "ok": true,
+      "status": 200,
+      "containsExpectedText": true
+    },
+    {
+      "name": "readiness",
+      "ok": true,
+      "status": 200,
+      "containsExpectedText": true
+    },
+    {
+      "name": "metrics",
+      "ok": true,
+      "status": 200,
+      "containsExpectedText": true
+    },
+    {
+      "name": "static_ui",
+      "ok": true,
+      "status": 200,
+      "containsExpectedText": true
+    },
+    {
+      "name": "client_config",
+      "ok": true,
+      "status": 200,
+      "containsExpectedText": true
+    }
+  ]
+}

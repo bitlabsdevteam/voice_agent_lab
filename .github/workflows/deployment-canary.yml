@@ -1,0 +1,32 @@
+name: deployment-canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_base_url:
+        description: Base URL to verify, such as https://voice-agent.example.com
+        required: true
+      provider:
+        description: Selected provider for live smoke evidence
+        required: true
+        default: openai
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_BASE_URL: ${{ inputs.deployment_base_url }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      ELEVENLABS_AGENT_ID: ${{ secrets.ELEVENLABS_AGENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: npm
+      - run: npm ci
+      - run: npm run test:release
+      - run: npm run deploy:canary:${{ inputs.provider }}
+      - run: npm run release:manifest
+      - run: npm run deploy:check:production

@@ -1,11 +1,12 @@
 {
   "application": "production-voice-agent",
   "version": "0.1.0",
-  "buildId": "local-1779552752472",
-  "createdAt": "2026-05-23T16:12:32.472Z",
+  "buildId": "local-1779583645831",
+  "createdAt": "2026-05-24T00:47:25.833Z",
   "provider": "mock-openai",
   "modelId": "gpt-realtime-2",
   "sessionStore": "memory",
+  "eventSink": "memory",
   "promptVersion": "voice-agent-v1",
   "promptSha256": "5592563b8a5d6fa505b34b851df8d454114903ec9007f1d61f2a7fad173424c1",
   "releaseGates": [
@@ -22,6 +23,18 @@
     "test:security",
     "smoke:local"
   ],
+  "liveSmoke": {
+    "openai": "skipped",
+    "elevenlabs": "skipped_missing_ELEVENLABS_API_KEY_or_ELEVENLABS_AGENT_ID"
+  },
+  "observability": {
+    "prometheusConfig": "available",
+    "alertRules": "available",
+    "grafanaDashboard": "available"
+  },
+  "deploymentEvidence": "available",
+  "remoteDeploymentEvidence": "available",
+  "productionCanaryEvidence": "failed",
   "rollback": {
     "previousBuildId": "manual-required",
     "promptRollbackSupported": true,

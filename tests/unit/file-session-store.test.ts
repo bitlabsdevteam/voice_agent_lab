@@ -4,10 +4,10 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { FileSessionStore } from "../../src/session/file-session-store";
 
-test("file session store persists sessions across instances", () => {
+test("file session store persists sessions across instances", async () => {
   const dataDir = join(".voice-agent-data", `test-${randomUUID()}`);
   const first = new FileSessionStore(dataDir);
-  first.save({
+  await first.save({
     sessionId: "sess_file",
     tenantId: "tenant_file",
     userId: "user_file",
@@ -23,5 +23,5 @@ test("file session store persists sessions across instances", () => {
   });
 
   const second = new FileSessionStore(dataDir);
-  assert.equal(second.get("sess_file")?.tenantId, "tenant_file");
+  assert.equal((await second.get("sess_file"))?.tenantId, "tenant_file");
 });

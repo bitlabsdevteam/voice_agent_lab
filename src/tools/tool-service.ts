@@ -4,6 +4,7 @@ import type { ToolContext, ToolResult, VoiceAgentTool } from "../contracts/tools
 
 export class ToolService {
   private readonly tools = new Map<string, VoiceAgentTool>();
+  private readonly completedCalls = new Map<string, ToolResult>();
 
   constructor(
     tools: VoiceAgentTool[],
@@ -28,8 +29,13 @@ export class ToolService {
       ...input.context,
       idempotencyKey: input.context.idempotencyKey ?? randomUUID()
     };
+    const idempotencyCacheKey = `${context.sessionId}:${tool.name}:${context.idempotencyKey}`;
+    const cached = this.completedCalls.get(idempotencyCacheKey);
+    if (cached) {
+      return cached;
+    }
 
-    this.eventSink.emit({
+    await this.eventSink.emit({
       eventId: randomUUID(),
       type: "tool.call.requested",
       sessionId: context.sessionId,
@@ -40,7 +46,7 @@ export class ToolService {
 
     try {
       const result = await tool.execute(input.args, context);
-      this.eventSink.emit({
+      await this.eventSink.emit({
         eventId: randomUUID(),
         type: "tool.call.completed",
         sessionId: context.sessionId,
@@ -48,9 +54,10 @@ export class ToolService {
         occurredAt: new Date().toISOString(),
         payload: { toolName: tool.name, ok: result.ok }
       });
+      this.completedCalls.set(idempotencyCacheKey, result);
       return result;
     } catch (error) {
-      this.eventSink.emit({
+      await this.eventSink.emit({
         eventId: randomUUID(),
         type: "tool.call.failed",
         sessionId: context.sessionId,

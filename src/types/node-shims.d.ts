@@ -64,10 +64,13 @@ declare module "node:http" {
     listener: (request: IncomingMessage, response: ServerResponse) => void
   ): {
     listen(port: number, callback?: () => void): void;
+    close(callback?: () => void): void;
+    address(): { port: number } | string | null;
   };
 }
 
 declare module "node:fs" {
+  export function appendFileSync(path: string, data: string): void;
   export function existsSync(path: string): boolean;
   export function mkdirSync(path: string, options?: { recursive?: boolean }): void;
   export function readdirSync(path: string, options?: { withFileTypes?: boolean }): Array<{
@@ -78,6 +81,7 @@ declare module "node:fs" {
   export function readFileSync(path: string, encoding: "utf8"): string;
   export function statSync(path: string): { isDirectory(): boolean; isFile(): boolean };
   export function writeFileSync(path: string, data: string): void;
+  export function unlinkSync(path: string): void;
 }
 
 declare module "node:path" {

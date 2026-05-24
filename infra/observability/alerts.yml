@@ -1,0 +1,65 @@
+groups:
+  - name: voice-agent-production
+    rules:
+      - alert: VoiceAgentInstanceDown
+        expr: up{job="voice-agent"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Voice agent metrics endpoint is unreachable
+          description: The voice-agent target has been down for more than 2 minutes.
+
+      - alert: VoiceAgentConnectionSuccessLow
+        expr: voice_agent_realtime_connection_success_rate_percent < 99
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Realtime connection success is below the release threshold
+          description: Connected sessions are below 99% of created sessions for 10 minutes.
+
+      - alert: VoiceAgentTimeToFirstAudioHigh
+        expr: voice_agent_time_to_first_audio_p95_milliseconds > 1500
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Time to first audio p95 is above target
+          description: First-audio proxy p95 exceeded 1500 ms for 10 minutes.
+
+      - alert: VoiceAgentTurnCompletionLatencyHigh
+        expr: voice_agent_turn_completion_latency_p95_milliseconds > 2000
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Turn completion latency p95 is above target
+          description: Completed turn latency p95 exceeded 2000 ms for 10 minutes.
+
+      - alert: VoiceAgentBargeInCancellationSlow
+        expr: voice_agent_barge_in_cancellation_p95_milliseconds > 500
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Barge-in cancellation latency is above target
+          description: Barge-in cancellation p95 exceeded 500 ms for 5 minutes.
+
+      - alert: VoiceAgentToolSuccessLow
+        expr: voice_agent_tool_call_success_rate_percent < 99
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Tool success rate is below target
+          description: Tool success rate fell below 99% for 10 minutes.
+
+      - alert: VoiceAgentGuardrailSpike
+        expr: increase(voice_agent_guardrails_triggered_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Guardrail trigger volume increased sharply
+          description: Guardrail triggers increased by more than 5 in 15 minutes.

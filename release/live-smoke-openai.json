@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "skipped": true,
+  "provider": "openai",
+  "reason": "OPENAI_API_KEY missing",
+  "checkedAt": "2026-05-24T00:44:41.218Z"
+}

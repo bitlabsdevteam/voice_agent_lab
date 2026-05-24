@@ -1,0 +1,8 @@
+dist
+node_modules
+.env
+.env.*
+.voice-agent-data
+release
+coverage
+npm-debug.log*

@@ -26,10 +26,11 @@ test("creates session, connects, executes read-only tool, and audits events", as
   });
 
   assert.equal(result.ok, true);
-  assert.equal(store.get(session.sessionId)?.status, "connected");
-  assert.ok(eventSink.list().find((event) => event.type === "session.created"));
-  assert.ok(eventSink.list().find((event) => event.type === "session.connected"));
-  assert.ok(eventSink.list().find((event) => event.type === "tool.call.completed"));
+  const events = await eventSink.list();
+  assert.equal((await store.get(session.sessionId))?.status, "connected");
+  assert.ok(events.find((event) => event.type === "session.created"));
+  assert.ok(events.find((event) => event.type === "session.connected"));
+  assert.ok(events.find((event) => event.type === "tool.call.completed"));
 });
 
 test("ending a session persists terminal state and emits event", async () => {
@@ -41,6 +42,6 @@ test("ending a session persists terminal state and emits event", async () => {
 
   await gateway.endSession(session.sessionId, testAuth);
 
-  assert.equal(store.get(session.sessionId)?.status, "ended");
-  assert.ok(eventSink.list().find((event) => event.type === "session.ended"));
+  assert.equal((await store.get(session.sessionId))?.status, "ended");
+  assert.ok((await eventSink.list()).find((event) => event.type === "session.ended"));
 });

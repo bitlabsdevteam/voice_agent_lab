@@ -5,25 +5,72 @@ import { loadRuntimeConfig, toSessionConfig, type RuntimeConfig } from "./config
 import type { AuthContext, CreateVoiceSessionInput } from "./contracts/session";
 import { createVoiceProvider } from "./providers/provider-factory";
 import { InMemoryEventSink } from "./telemetry/in-memory-event-sink";
+import { FileEventSink } from "./telemetry/file-event-sink";
+import { PostgresEventSink } from "./telemetry/postgres-event-sink";
+import { collectMetrics, renderPrometheusMetrics } from "./telemetry/metrics";
 import { FileSessionStore } from "./session/file-session-store";
 import { InMemorySessionStore, type SessionStore } from "./session/session-store";
+import { PostgresSessionStore } from "./session/postgres-session-store";
 import { SessionGateway } from "./session/session-gateway";
 import { getReadiness } from "./health/readiness";
+import { lookupPolicyTool } from "./tools/policy-tool";
+import { ToolService } from "./tools/tool-service";
+import { RealtimeToolHandler, type RealtimeToolRequest } from "./agent/realtime-tool-handler";
+import { HandoffService, type HandoffReason } from "./handoff/handoff-service";
+import { RetentionService } from "./retention/retention-service";
+import type { EventSink } from "./contracts/events";
+import { PostgresDatabase } from "./db/postgres";
 
 export type AppDependencies = {
   gateway: SessionGateway;
-  eventSink: InMemoryEventSink;
+  eventSink: EventSink;
   store: SessionStore;
   config: RuntimeConfig;
+  realtimeToolHandler: RealtimeToolHandler;
+  handoffService: HandoffService;
+  retentionService: RetentionService;
 };
 
-export function createAppDependencies(): AppDependencies {
-  const config = loadRuntimeConfig();
-  const eventSink = new InMemoryEventSink();
-  const store = config.sessionStore === "file" ? new FileSessionStore(config.dataDir) : new InMemorySessionStore();
+export type AppDependencyOptions = {
+  config?: RuntimeConfig;
+};
+
+export function createAppDependencies(options: AppDependencyOptions = {}): AppDependencies {
+  const config = options.config ?? loadRuntimeConfig();
+  const database = config.sessionStore === "postgres" || config.eventSink === "postgres" ? createPostgresDatabase(config) : undefined;
+  const eventSink =
+    config.eventSink === "postgres"
+      ? new PostgresEventSink(requiredDatabase(database))
+      : config.eventSink === "file"
+        ? new FileEventSink(config.dataDir)
+        : new InMemoryEventSink();
+  const store =
+    config.sessionStore === "postgres"
+      ? new PostgresSessionStore(requiredDatabase(database))
+      : config.sessionStore === "file"
+        ? new FileSessionStore(config.dataDir)
+        : new InMemorySessionStore();
   const provider = createVoiceProvider(config.provider);
   const gateway = new SessionGateway(provider, store, eventSink, config);
-  return { gateway, eventSink, store, config };
+  const toolService = new ToolService([lookupPolicyTool], eventSink);
+  const realtimeToolHandler = new RealtimeToolHandler(store, toolService);
+  const handoffService = new HandoffService(store, eventSink);
+  const retentionService = new RetentionService(store, eventSink);
+  return { gateway, eventSink, store, config, realtimeToolHandler, handoffService, retentionService };
+}
+
+function createPostgresDatabase(config: RuntimeConfig): PostgresDatabase {
+  if (!config.databaseUrl) {
+    throw new Error("DATABASE_URL is required when using postgres session store or event sink");
+  }
+  return new PostgresDatabase(config.databaseUrl);
+}
+
+function requiredDatabase(database: PostgresDatabase | undefined): PostgresDatabase {
+  if (!database) {
+    throw new Error("Postgres database was not initialized");
+  }
+  return database;
 }
 
 export function createApp(dependencies = createAppDependencies()) {
@@ -35,7 +82,7 @@ export function createApp(dependencies = createAppDependencies()) {
       }
 
       if (request.method === "GET" && request.url === "/ready") {
-        const readiness = getReadiness(dependencies.config, dependencies.store);
+        const readiness = getReadiness(dependencies.config, dependencies.store, dependencies.eventSink);
         sendJson(response, readiness.ok ? 200 : 503, readiness);
         return;
       }
@@ -49,7 +96,12 @@ export function createApp(dependencies = createAppDependencies()) {
       }
 
       if (request.method === "GET" && request.url === "/api/voice/events") {
-        sendJson(response, 200, { events: dependencies.eventSink.list() });
+        sendJson(response, 200, { events: await dependencies.eventSink.list() });
+        return;
+      }
+
+      if (request.method === "GET" && request.url === "/metrics") {
+        sendText(response, 200, "text/plain; version=0.0.4", renderPrometheusMetrics(await collectMetrics(dependencies.eventSink)));
         return;
       }
 
@@ -58,6 +110,40 @@ export function createApp(dependencies = createAppDependencies()) {
         const auth = parseAuth(request);
         const result = await dependencies.gateway.createSession(body, auth);
         sendJson(response, 201, result);
+        return;
+      }
+
+      if (request.method === "POST" && request.url === "/api/realtime/tool") {
+        const body = await readJson<RealtimeToolRequest>(request);
+        const auth = parseAuth(request);
+        const result = await dependencies.realtimeToolHandler.handleToolRequest(body, auth);
+        sendJson(response, 200, result);
+        return;
+      }
+
+      if (request.method === "POST" && request.url === "/api/handoff") {
+        const body = await readJson<{
+          sessionId: string;
+          reason: HandoffReason;
+          summary: string;
+          verifiedIdentity: boolean;
+          openQuestions?: string[];
+          riskFlags?: string[];
+        }>(request);
+        const auth = parseAuth(request);
+        const result = await dependencies.handoffService.requestHandoff(body, auth);
+        sendJson(response, 201, result);
+        return;
+      }
+
+      if (request.method === "POST" && request.url === "/admin/retention/purge") {
+        const auth = parseAuth(request);
+        assertAdmin(auth);
+        const result = await dependencies.retentionService.purgeExpiredEvents(
+          new Date(),
+          dependencies.config.transcriptRetentionDays
+        );
+        sendJson(response, 200, result);
         return;
       }
 
@@ -74,6 +160,12 @@ export function createApp(dependencies = createAppDependencies()) {
       });
     }
   });
+}
+
+function assertAdmin(auth: AuthContext): void {
+  if (!auth.scopes.includes("admin:retention")) {
+    throw new Error("Missing required scope: admin:retention");
+  }
 }
 
 function tryServeStatic(request: IncomingMessage, response: ServerResponse): boolean {
@@ -134,6 +226,12 @@ function sendJson(response: ServerResponse, statusCode: number, body: unknown): 
   response.statusCode = statusCode;
   response.setHeader("content-type", "application/json");
   response.end(JSON.stringify(body));
+}
+
+function sendText(response: ServerResponse, statusCode: number, contentType: string, body: string): void {
+  response.statusCode = statusCode;
+  response.setHeader("content-type", contentType);
+  response.end(body);
 }
 
 async function readJson<T>(request: IncomingMessage): Promise<T> {

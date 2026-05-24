@@ -46,7 +46,7 @@ export class RealtimeTurnSimulator {
   }
 
   private record(type: "agent.response.started" | "agent.response.cancelled" | "agent.response.completed" | "turn.detected", payload: Record<string, unknown>): void {
-    this.eventSink.emit({
+    void this.eventSink.emit({
       eventId: randomUUID(),
       type,
       sessionId: this.sessionId,
